@@ -10,6 +10,7 @@ env/
 
 # Environment Variables
 .env
+livekit.toml
 
 # OS specific
 .DS_Store

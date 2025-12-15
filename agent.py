@@ -17,7 +17,13 @@ except ImportError as e:
 
 load_dotenv()
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    force=True,
+)
 logger = logging.getLogger("voice-agent")
+AGENT_NAME = os.getenv("LIVEKIT_AGENT_NAME") or os.getenv("LK_AGENT_NAME") or "my-voice-agent"
 
 def prewarm(proc: JobContext):
     logger.info("Prewarming VAD...")
@@ -28,18 +34,29 @@ def prewarm(proc: JobContext):
         logger.error(f"Failed to load VAD: {e}")
 
 async def entrypoint(ctx: JobContext):
-    print(f"DEBUG: Entrypoint called for room {ctx.room.name}")
-    logger.info(f"Entrypoint called for room {ctx.room.name}")
-    
+    logger.info(
+        "Entrypoint called",
+        extra={
+            "room": ctx.room.name,
+            "room_meta": getattr(ctx.room, "metadata", None),
+            "agent_name": getattr(ctx.job, "agent_name", None),
+        },
+    )
 
+    try:
+        logger.info("Connecting to room %s", ctx.room.name)
+        await ctx.connect(auto_subscribe=AutoSubscribe.AUDIO_ONLY)
+        logger.info("Connected to room %s", ctx.room.name)
+    except Exception as e:
+        logger.error("Failed to connect to room %s: %s", ctx.room.name, e, exc_info=True)
+        raise
 
-    logger.info(f"connecting to room {ctx.room.name}")
-    await ctx.connect(auto_subscribe=AutoSubscribe.AUDIO_ONLY)
-    logger.info("Connected to room")
-
-    # Wait for the first participant to connect
-    participant = await ctx.wait_for_participant()
-    logger.info(f"starting voice assistant for participant {participant.identity}")
+    try:
+        participant = await ctx.wait_for_participant()
+        logger.info("First participant detected: %s", participant.identity)
+    except Exception as e:
+        logger.error("Failed while waiting for participant: %s", e, exc_info=True)
+        raise
 
     instructions = (
         "You are a voice assistant created by LiveKit. Your interface with users will be voice. "
@@ -59,12 +76,14 @@ async def entrypoint(ctx: JobContext):
         logger.info("Starting agent session...")
         await session.start(agent, room=ctx.room)
         logger.info("Agent session started")
-        
+
         logger.info("Agent saying hello...")
         await session.say("Hey, how can I help you today?", allow_interruptions=True)
         logger.info("Agent said hello")
     except Exception as e:
-        logger.error(f"Error in agent session: {e}", exc_info=True)
+        logger.error("Error in agent session: %s", e, exc_info=True)
+        raise
 
 if __name__ == "__main__":
-    cli.run_app(WorkerOptions(entrypoint_fnc=entrypoint, prewarm_fnc=prewarm, agent_name="my-voice-agent"))
+    logger.info("Starting agent with name '%s'", AGENT_NAME)
+    cli.run_app(WorkerOptions(entrypoint_fnc=entrypoint, prewarm_fnc=prewarm, agent_name=AGENT_NAME))

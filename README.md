@@ -45,7 +45,10 @@ This is the backend for the LiveKit Voice Agent, built with Python and the LiveK
     LIVEKIT_API_KEY=<your-api-key>
     LIVEKIT_API_SECRET=<your-api-secret>
     OPENAI_API_KEY=<your-openai-api-key>
+    LIVEKIT_AGENT_NAME=my-voice-agent  # match this with NEXT_PUBLIC_AGENT_NAME / LK_AGENT_NAME
     ```
+
+When deployed via `lk agent deploy`, LiveKit injects `LK_AGENT_NAME`; the worker now respects that value automatically. Keep the frontend `NEXT_PUBLIC_AGENT_NAME` in sync so explicit dispatch targets the running agent.
 
 ## Usage
 
@@ -66,9 +69,46 @@ python agent.py dev
 
 This will connect the agent to your LiveKit project. When a user connects to a room, the agent will automatically join and start the voice assistant session.
 
+## Deployment to LiveKit Cloud
+
+To deploy this agent to LiveKit Cloud for 24/7 availability with automatic scaling:
+
+### Quick Deploy
+
+```bash
+# 1. Authenticate with LiveKit Cloud
+lk cloud auth
+
+# 2. Create and configure your agent
+lk agent create --region us-west --secrets OPENAI_API_KEY="your-openai-api-key"
+
+# 3. Deploy to LiveKit Cloud
+lk agent deploy
+
+# 4. Monitor deployment
+lk agent logs --follow
+```
+
+### Complete Guide
+
+See the comprehensive **[DEPLOYMENT.md](DEPLOYMENT.md)** guide for:
+- Detailed step-by-step instructions
+- Managing secrets and environment variables
+- Monitoring and troubleshooting
+- Updating deployed agents
+- Regional deployment options
+
+Once deployed, your agent will:
+- ✅ Automatically connect to LiveKit Cloud
+- ✅ Join rooms when users connect
+- ✅ Scale automatically based on demand
+- ✅ Be accessible 24/7 globally
+
 ## File Structure
 
 - `agent.py`: The main entry point for the voice agent worker.
 - `requirements.txt`: Python dependencies.
-- `run_agent.sh`: Helper script to run the agent.
+- `run_agent.sh`: Helper script to run the agent locally.
 - `dispatch.py`: (Optional) Script for manual dispatching if needed.
+- `Dockerfile`: Docker configuration for LiveKit Cloud deployment.
+- `DEPLOYMENT.md`: Comprehensive deployment guide for LiveKit Cloud.
