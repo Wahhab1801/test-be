@@ -21,13 +21,13 @@ This is the backend for the LiveKit Voice Agent, built with Python and the LiveK
 3.  **Activate the virtual environment:**
 
     - macOS/Linux:
-        ```bash
-        source venv/bin/activate
-        ```
+      ```bash
+      source venv/bin/activate
+      ```
     - Windows:
-        ```bash
-        .\venv\Scripts\activate
-        ```
+      ```bash
+      .\venv\Scripts\activate
+      ```
 
 4.  **Install dependencies:**
 
@@ -68,6 +68,7 @@ python agent.py dev
 ```
 
 This will connect the agent to your LiveKit project. When a user connects to a room, the agent will automatically join and start the voice assistant session.
+The accompanying Next.js frontend handles room creation, token issuance, and agent dispatch; no extra backend endpoints are required.
 
 ## Deployment to LiveKit Cloud
 
@@ -92,6 +93,7 @@ lk agent logs --follow
 ### Complete Guide
 
 See the comprehensive **[DEPLOYMENT.md](DEPLOYMENT.md)** guide for:
+
 - Detailed step-by-step instructions
 - Managing secrets and environment variables
 - Monitoring and troubleshooting
@@ -99,16 +101,14 @@ See the comprehensive **[DEPLOYMENT.md](DEPLOYMENT.md)** guide for:
 - Regional deployment options
 
 Once deployed, your agent will:
-- ✅ Automatically connect to LiveKit Cloud
-- ✅ Join rooms when users connect
-- ✅ Scale automatically based on demand
-- ✅ Be accessible 24/7 globally
+
+- Automatically connect to LiveKit Cloud
+- Join rooms when users connect
 
 ## File Structure
 
 - `agent.py`: The main entry point for the voice agent worker.
 - `requirements.txt`: Python dependencies.
 - `run_agent.sh`: Helper script to run the agent locally.
-- `dispatch.py`: (Optional) Script for manual dispatching if needed.
 - `Dockerfile`: Docker configuration for LiveKit Cloud deployment.
 - `DEPLOYMENT.md`: Comprehensive deployment guide for LiveKit Cloud.

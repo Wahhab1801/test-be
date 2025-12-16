@@ -16,7 +16,6 @@ RUN pip install --no-cache-dir --quiet -r requirements.txt
 
 # Copy application code
 COPY agent.py .
-COPY dispatch.py .
 
 # Run the agent
 CMD ["python", "agent.py", "start"]
